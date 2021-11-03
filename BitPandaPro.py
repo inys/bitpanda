@@ -2,6 +2,10 @@
 from typing import AsyncContextManager
 import requests
 import json
+import re
+
+from datetime import timedelta, datetime
+
 
 #Declaring the API-version and the Bitpanda-API-URL's
 BitpandaProURL = "https://api.exchange.bitpanda.com/public/v1"
@@ -12,6 +16,10 @@ BitpandaProURL = "https://api.exchange.bitpanda.com/public/v1"
 class BitPandaPro(object):
   def __init__(self, api_key=None):
     self.api_key = api_key
+
+  def market_time_to_datetime(market_time):
+    m = re.match(r'(?P<year>\d+)-(?P<month>\d+)-(?P<day>\d+)T(?P<hour>\d+):(?P<minute>\d+):(?P<second>\d+)', market_time)
+    return datetime(year=int(m['year']), month=int(m['month']), day=int(m['day']), hour=int(m['hour']), minute=int(m['minute']), second=int(m['second']))
 
   def set_api_key(self, api_key):
     self.api_key = api_key
@@ -27,6 +35,30 @@ class BitPandaPro(object):
       url = url + '/market-ticker/' + instrument_code
 
     response = requests.get(url, headers = {'Accept': 'application/json'})
+
+    data = response.json()
+    if type(data) is not list:
+      return [data]
+    else:
+      return data
+
+  def get_candlestics(self, instrument_code, fr, to):
+    url = BitpandaProURL
+    url = url + '/candlesticks/' + instrument_code
+
+    headers = {
+      'Accept': 'application/json',
+    }
+
+    params = {}
+    params.update({
+      'unit': 'MINUTES',
+      'period': '15',
+      'from': fr.strftime('%Y-%m-%dT%H:%m:%SZ'),
+      'to': to.strftime('%Y-%m-%dT%H:%m:%SZ')
+    })
+
+    response = requests.get(url, headers=headers, params=params)
 
     data = response.json()
     if type(data) is not list:
