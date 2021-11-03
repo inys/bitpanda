@@ -32,3 +32,27 @@ class BitPanda(object):
 
     except:
       return response
+
+  def get_wallets(self):
+    response = requests.get(BitPandaURL + '/wallets', headers = {'X-API-KEY' : self.api_key}).json()
+
+    try:
+      data = response['data']
+      output = []
+      for i in range(len(data)):
+        output.append({
+          'id': data[i]['id'],
+          'cryptocoin_id': data[i]['attributes']['cryptocoin_id'],
+          'cryptocoin_symbol': data[i]['attributes']['cryptocoin_symbol'],
+          'balance': data[i]['attributes']['balance'],
+          'is_default': data[i]['attributes']['is_default'],
+          'name': data[i]['attributes']['name'],
+          'pending_transactions_count': data[i]['attributes']['pending_transactions_count'],
+          'deleted': data[i]['attributes']['deleted']
+        })
+      return output
+
+    except:
+      return response
+
+    
