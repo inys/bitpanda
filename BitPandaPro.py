@@ -98,6 +98,25 @@ class BitPandaPro(object):
     else:
       return data
 
+  def get_balances(self):
+    if self.api_key is None:
+      return []
+
+    url = BitpandaProURL + '/account/balances/'
+
+    headers = {
+      'Accept': 'application/json',
+      'Authorization': 'Bearer {}'.format(self.api_key)
+    }
+
+    params = {}
+
+    response = requests.get(url, headers=headers, params=params)
+
+    data = response.json()
+    return data['balances']
+
+
   def create_limit_buy_order(self, instrument_code, amount, price):
     if self.api_key is None:
       return []
